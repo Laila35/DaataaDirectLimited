@@ -1,0 +1,125 @@
+.services-page { padding: 6vh 6vw 8vh; }
+
+.services-hero { animation: rise-in 0.7s ease both; }
+
+.page-kicker {
+  margin: 0;
+  color: #6d4ed4;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.services-page h1 {
+  margin: 12px 0 0;
+  max-width: 14ch;
+  font-size: clamp(48px, 6.4vw, 84px);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+.page-lede {
+  max-width: 46rem;
+  margin: 20px 0 0;
+  color: rgba(20, 12, 34, 0.62);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.services-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 32px 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.services-facts li {
+  padding: 18px 18px 16px;
+  border: 1px solid rgba(20, 12, 34, 0.08);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(163, 132, 245, 0.16), transparent 70%),
+    #fff;
+  animation: rise-in 0.7s ease both;
+}
+
+.services-facts li:nth-child(2) { animation-delay: 0.08s; }
+.services-facts li:nth-child(3) { animation-delay: 0.16s; }
+
+.services-facts strong {
+  display: block;
+  font-size: 20px;
+  letter-spacing: -0.03em;
+}
+
+.services-facts span {
+  display: block;
+  margin-top: 6px;
+  color: rgba(20, 12, 34, 0.58);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.services-close {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-top: 28px;
+  padding: 32px;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 100% 0, rgba(163, 132, 245, 0.45), transparent 36%),
+    #111;
+  color: #fff;
+}
+
+.services-close h2 {
+  margin: 10px 0 0;
+  max-width: 14ch;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+}
+
+.services-close p:last-child {
+  max-width: 36ch;
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.5;
+}
+
+.page-cta {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: #a384f5;
+  color: #111;
+  font-weight: 800;
+}
+
+.page-cta:hover { background: #fff; }
+
+@keyframes rise-in {
+  from { opacity: 0; translate: 0 16px; }
+  to { opacity: 1; translate: 0; }
+}
+
+@media (max-width: 800px) {
+  .services-facts,
+  .services-close { grid-template-columns: 1fr; }
+  .services-close { flex-direction: column; align-items: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .services-hero,
+  .services-facts li { animation: none; }
+}

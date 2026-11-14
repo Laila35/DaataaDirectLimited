@@ -1,0 +1,47 @@
+<div class="sticky top-0 z-20 bg-white/90 backdrop-blur-md">
+  <header class="relative flex justify-center px-20 pt-3 pb-4">
+    <div class="relative w-full max-w-5xl flex items-center justify-between gap-3 rounded-full border border-black/15 bg-gradient-to-r from-white via-[#e1dbf2] to-white px-3 py-2">
+      <a routerLink="/" class="nav-logo-link" aria-label="Daataa Direct home" (click)="goHome()">
+        <span class="nav-logo-ring" aria-hidden="true"></span>
+        <img src="/logo.jpeg" alt="Daataa Direct" class="nav-logo">
+      </a>
+      <button type="button" class="md:hidden border border-black rounded-full px-4 py-2 font-semibold" (click)="menuOpen.set(!menuOpen())">Menu</button>
+      <nav class="items-center gap-1 md:flex md:static md:flex-row md:border-0 md:bg-transparent md:p-0" [ngClass]="menuOpen() ? 'flex flex-col absolute top-full left-0 right-0 mt-2 bg-white border rounded-3xl p-3 z-30' : 'hidden'">
+        <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/" (click)="goHome()">Home</a>
+        <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/services" (click)="closeMenus()" (mouseenter)="openServices()" (mouseleave)="scheduleCloseServices()" [attr.aria-expanded]="servicesOpen()">Services</a>
+        <div class="relative" (mouseenter)="openCompany()" (mouseleave)="scheduleCloseCompany()">
+          <button type="button" class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" (click)="onCompanyClick()" [attr.aria-expanded]="companyOpen()">Company</button>
+          @if (companyOpen()) {
+            <div class="z-40 mt-1 grid gap-1 md:absolute md:left-0 md:top-full md:mt-0 md:w-52 md:pt-3">
+              <div class="grid gap-1 rounded-3xl border border-black/10 bg-white p-2 shadow-xl">
+                <a class="rounded-2xl px-4 py-2.5 font-semibold hover:bg-accent" routerLink="/faqs" (click)="closeMenus()">FAQs</a>
+                <a class="rounded-2xl px-4 py-2.5 font-semibold hover:bg-accent" routerLink="/reviews" (click)="closeMenus()">Reviews</a>
+              </div>
+            </div>
+          }
+        </div>
+        <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/about" (click)="closeMenus()">About</a>
+        <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/careers" (click)="closeMenus()">Careers</a>
+        <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/contact" (click)="closeMenus()">Contact</a>
+        @if (auth.user()?.role === 'admin') {
+          <a class="font-semibold px-4 py-2 rounded-full border border-black" routerLink="/admin" (click)="closeMenus()">Admin</a>
+        }
+      </nav>
+      <a routerLink="/contact" class="hidden md:inline-flex items-center rounded-full bg-accent font-bold px-5 py-3">Start your project</a>
+      @if (servicesOpen()) {
+        <div class="absolute left-0 right-0 top-full z-40 hidden pt-3 md:block" (mouseenter)="openServices()" (mouseleave)="scheduleCloseServices()">
+          <div class="grid grid-cols-3 gap-1 rounded-3xl border border-black/10 bg-white p-3 shadow-xl">
+            @for (title of services; track title) {
+              <a class="rounded-2xl px-3 py-2.5 font-sans font-semibold leading-snug hover:bg-accent" routerLink="/services" (click)="closeMenus()">{{ title }}</a>
+            }
+          </div>
+        </div>
+      }
+    </div>
+    @if (auth.user()) {
+      <button type="button" class="absolute right-2 top-5 bg-transparent px-3 py-1.5 text-sm font-bold text-black" (click)="signOut()">Logout</button>
+    } @else {
+      <a class="absolute right-2 top-5 bg-transparent px-3 py-1.5 text-sm font-bold text-black" routerLink="/sign-in" (click)="closeMenus()">Sign in</a>
+    }
+  </header>
+</div>

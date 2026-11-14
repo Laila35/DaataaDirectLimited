@@ -1,0 +1,78 @@
+<app-site-header [services]="services" />
+<main>
+  <section class="contact-stage">
+    <app-data-globe [logoUrl]="'assets/logo.jpeg'" class="contact-globe" />
+    <div class="contact-layout">
+      <div class="contact-copy">
+        <p class="contact-kicker">Contact</p>
+        <h1>Let’s reach the right <em>people.</em></h1>
+        <p>Tell us what you want to reach and who you want to reach. We read every message and reply within one working day.</p>
+        <a class="contact-mail" [href]="'mailto:' + contact.email">{{ contact.email }}</a>
+      </div>
+      @if (contactSent()) {
+        <p class="contact-card contact-done">Message received. We reply within one working day.</p>
+      } @else {
+        <form id="contact-form" class="contact-card" [formGroup]="contactForm" (ngSubmit)="submitContact()">
+          <label>Your name <span>*</span>
+            <input id="contact-name" class="contact-input" formControlName="name" placeholder="Your name" autocomplete="name">
+          </label>
+          <label>Your email address <span>*</span>
+            <input class="contact-input" type="email" formControlName="email" placeholder="Your email address" autocomplete="email">
+          </label>
+          <div class="contact-split">
+            <label>Phone number
+              <input class="contact-input" type="tel" formControlName="phone" placeholder="0301 2345678" autocomplete="tel">
+            </label>
+            <label>Company
+              <input class="contact-input" formControlName="company" placeholder="Company (optional)" autocomplete="organization">
+            </label>
+          </div>
+          <label>Tell us about your project <span>*</span>
+            <textarea class="contact-input" formControlName="message" placeholder="Tell us about your project"></textarea>
+          </label>
+          <div class="contact-actions">
+            <button class="contact-call" type="button" (click)="bookCall()">Book a call</button>
+            <button class="contact-send" type="submit">Send message</button>
+          </div>
+        </form>
+      }
+    </div>
+  </section>
+  <section class="contact-facts" aria-label="How to reach Daataa Direct">
+    <article class="contact-fact">
+      <span class="fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3h3l1.2 3.2a12 12 0 0 0 5.6 5.6L21 13v3a2 2 0 0 1-2.2 2A17 17 0 0 1 3 5.2 2 2 0 0 1 5 3h3z"/></svg></span>
+      <div>
+        <p>Call us</p>
+        <a [href]="contact.phoneHref">{{ contact.phone }}</a>
+      </div>
+    </article>
+    <article class="contact-fact">
+      <span class="fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg></span>
+      <div>
+        <p>Email us</p>
+        <a [href]="'mailto:' + contact.email">{{ contact.email }}</a>
+        <small>Every form message is sent here.</small>
+      </div>
+    </article>
+    <article class="contact-fact">
+      <span class="fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.2"/></svg></span>
+      <div>
+        <p>Office</p>
+        <address>
+          @for (line of contact.address; track line) {
+            <span>{{ line }}</span>
+          }
+        </address>
+        <small>11am – 8pm, Pakistan time.</small>
+      </div>
+    </article>
+    <article class="contact-fact">
+      <span class="fact-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V6l8-3 8 3v14"/><path d="M9 20v-6h6v6"/><path d="M4 10h16"/></svg></span>
+      <div>
+        <p>Company number</p>
+        <strong>{{ contact.companyNumber }}</strong>
+        <small>Daataa Direct Limited</small>
+      </div>
+    </article>
+  </section>
+</main>

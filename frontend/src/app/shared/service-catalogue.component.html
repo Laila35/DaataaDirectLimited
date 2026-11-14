@@ -1,0 +1,21 @@
+<div class="catalogue">
+  @for (group of groups; track group.title; let i = $index) {
+    <section class="lane">
+      <header>
+        <span>{{ (i + 1).toString().padStart(2, '0') }}</span>
+        <h2>{{ group.title }}</h2>
+        <p>{{ group.text }}</p>
+      </header>
+      <ul>
+        @for (item of group.items; track item.name) {
+          <li>
+            <strong>{{ item.name }}</strong>
+            @if (item.notes; as notes) {
+              <small>{{ notes.join(' · ') }}</small>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

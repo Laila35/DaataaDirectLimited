@@ -1,0 +1,124 @@
+@if (result(); as screen) {
+  <section class="screen-result" [attr.data-decision]="screen.screen_decision">
+    <div class="screen-top">
+      <div>
+        <p class="screen-kicker">
+          @if (screen.screen_decision === 'Approved') { Application accepted }
+          @else if (screen.screen_decision === 'Rejected') { Application closed }
+          @else { Application in review }
+        </p>
+        <h2>
+          @if (screen.screen_decision === 'Approved') { Your application is with the hiring team. }
+          @else if (screen.screen_decision === 'Rejected') { This application will not go forward. }
+          @else { Your application is waiting for a reviewer. }
+        </h2>
+        <p class="screen-copy">{{ screen.screen_message }}</p>
+      </div>
+      <div class="screen-meter">
+        <strong>{{ screen.match_score }}%</strong>
+        <span>CV match · {{ screen.position }}</span>
+      </div>
+    </div>
+    @if (screen.matched_skills.length || (screen.missing_skills.length && screen.screen_decision !== 'Approved')) {
+      <div class="screen-skills">
+        @if (screen.matched_skills.length) {
+          <div>
+            <p class="screen-label">Skills found on the CV</p>
+            <div class="screen-chips">
+              @for (skill of screen.matched_skills; track skill) { <span>{{ skillLabel(skill) }}</span> }
+            </div>
+          </div>
+        }
+        @if (screen.missing_skills.length && screen.screen_decision !== 'Approved') {
+          <div>
+            <p class="screen-label">Not found for this role</p>
+            <div class="screen-chips">
+              @for (skill of screen.missing_skills; track skill) { <span>{{ skillLabel(skill) }}</span> }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </section>
+} @else {
+<form class="apply-form" [formGroup]="form" (ngSubmit)="submit()">
+  <section class="apply-card">
+    <h2>Position</h2>
+    <label>
+      <span class="apply-name">Position applying for *</span>
+      <select class="apply-input" formControlName="position">
+        <option value="">Select</option>
+        @for (job of jobs; track job.id) { <option [value]="job.title">{{ job.title }}</option> }
+      </select>
+    </label>
+  </section>
+  <section class="apply-card">
+    <h2>Personal details</h2>
+    <div class="apply-grid">
+      <label><span class="apply-name">First name *</span><input class="apply-input" formControlName="first_name" autocomplete="given-name"></label>
+      <label><span class="apply-name">Last name *</span><input class="apply-input" formControlName="last_name" autocomplete="family-name"></label>
+      <label><span class="apply-name">Email address *</span><input class="apply-input" type="email" formControlName="email" autocomplete="email"></label>
+      <label><span class="apply-name">Contact number *</span><input class="apply-input" type="tel" formControlName="phone" placeholder="+00 000 0000000" autocomplete="tel"></label>
+    </div>
+  </section>
+  <section class="apply-card">
+    <h2>Address</h2>
+    <label><span class="apply-name">Street address *</span><input class="apply-input" formControlName="street" autocomplete="street-address"></label>
+    <div class="apply-grid">
+      <label><span class="apply-name">City *</span><input class="apply-input" formControlName="city" autocomplete="address-level2"></label>
+      <label><span class="apply-name">State or province</span><input class="apply-input" formControlName="region" autocomplete="address-level1"></label>
+      <label><span class="apply-name">Postal code</span><input class="apply-input" formControlName="postal_code" autocomplete="postal-code"></label>
+      <label><span class="apply-name">Country *</span><input class="apply-input" formControlName="country" autocomplete="country-name"></label>
+    </div>
+  </section>
+  <section class="apply-card">
+    <h2>Social links</h2>
+    <div class="apply-grid">
+      <label><span class="apply-name">LinkedIn</span><input class="apply-input" formControlName="linkedin" placeholder="https://linkedin.com/in/yourname"></label>
+      <label><span class="apply-name">Portfolio or website</span><input class="apply-input" formControlName="website" placeholder="https://"></label>
+      <label><span class="apply-name">GitHub</span><input class="apply-input" formControlName="github" placeholder="https://github.com/yourname"></label>
+      <label><span class="apply-name">Other social link</span><input class="apply-input" formControlName="other_link" placeholder="X, Instagram, Behance"></label>
+    </div>
+  </section>
+  <section class="apply-card">
+    <h2>Experience</h2>
+    <div class="apply-grid">
+      <label><span class="apply-name">Years of experience *</span>
+        <select class="apply-input" formControlName="experience">
+          <option value="">Select</option>
+          @for (item of experienceOptions; track item) { <option [value]="item">{{ item }}</option> }
+        </select>
+      </label>
+      <label><span class="apply-name">Current or last employer</span><input class="apply-input" formControlName="employer"></label>
+      <label><span class="apply-name">Expected salary</span><input class="apply-input" formControlName="salary"></label>
+      <label><span class="apply-name">Available from</span><input class="apply-input" type="date" formControlName="available_from"></label>
+    </div>
+  </section>
+  <section class="apply-card">
+    <h2>CV and cover letter</h2>
+    <div class="cv-field">
+      <p class="apply-name">Upload your CV *</p>
+      <label class="cv-drop" [class.is-over]="dragOver()" (dragover)="$event.preventDefault(); dragOver.set(true)" (dragleave)="dragOver.set(false)" (drop)="onDrop($event)">
+        <input type="file" accept=".pdf,.doc,.docx" (change)="onCv($event)">
+        <strong>{{ cvName() || 'Drag your CV here or click to browse' }}</strong>
+        <small>PDF, DOC or DOCX, up to 5 MB</small>
+      </label>
+    </div>
+    <label><span class="apply-name">Cover letter (optional)</span>
+      <textarea class="apply-input apply-area" formControlName="cover_letter"></textarea>
+    </label>
+    <label><span class="apply-name">How did you hear about us?</span>
+      <select class="apply-input" formControlName="heard_from">
+        <option value="">Select</option>
+        @for (item of heardOptions; track item) { <option [value]="item">{{ item }}</option> }
+      </select>
+    </label>
+    <label class="apply-check">
+      <input type="checkbox" formControlName="confirm">
+      <span>I confirm my details are correct and agree to Daataa Direct Limited keeping them for recruitment.</span>
+    </label>
+  </section>
+  @if (formError()) { <p class="apply-error">{{ formError() }}</p> }
+  <button class="apply-submit" type="submit">Submit application</button>
+</form>
+}

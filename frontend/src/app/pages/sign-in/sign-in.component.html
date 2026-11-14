@@ -1,0 +1,88 @@
+<div class="min-h-screen grid lg:grid-cols-2">
+  <aside class="auth-side text-white p-10 flex flex-col justify-end min-h-[280px] relative overflow-hidden">
+    <app-data-globe [showLogo]="true" [logoUrl]="'/logo.jpeg'" class="auth-globe" />
+    <div class="auth-copy">
+      @if (portal() === 'employee') {
+        <h2 class="font-black tracking-tight leading-none text-5xl max-w-[10ch]">Your team, in one place.</h2>
+        <p class="mt-5 max-w-sm text-white/80 text-lg leading-relaxed">Sign in to manage campaigns, reports and company tools.</p>
+      } @else {
+        <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Daataa Direct Limited</p>
+        <h2 class="mt-4 font-black tracking-tight leading-none text-5xl max-w-[10ch]">Admin sign in</h2>
+        <p class="mt-5 max-w-sm text-white/80 text-lg leading-relaxed">The private desk for careers, the About page, and applications.</p>
+      }
+      <small class="mt-6 block text-white/50">© 2026 Daataa Direct Limited</small>
+    </div>
+  </aside>
+  <section class="grid place-items-center p-8 relative bg-white text-black">
+    <a routerLink="/" class="absolute top-5 right-5 w-12 h-12 rounded-full border border-black grid place-items-center text-2xl" aria-label="Close">×</a>
+    <div class="w-full max-w-md">
+      <div class="mode-switch" [class.is-up]="portal() === 'admin'" role="tablist" aria-label="Login">
+        <span class="mode-pill" aria-hidden="true"></span>
+        <button type="button" role="tab" [attr.aria-selected]="portal() === 'employee'" [class.is-on]="portal() === 'employee'" (click)="setPortal('employee')">Employee login</button>
+        <button type="button" role="tab" [attr.aria-selected]="portal() === 'admin'" [class.is-on]="portal() === 'admin'" (click)="setPortal('admin')">Admin login</button>
+      </div>
+      @if (portal() === 'employee' && mode() === 'in') {
+        <div class="auth-pane">
+          <h3 class="mt-6 text-4xl font-black tracking-tight">Sign in</h3>
+          <p class="mt-2 text-black/60">Active staff only. An admin email is not eligible on this form.</p>
+          <form class="mt-6 grid gap-4" [formGroup]="signIn" (ngSubmit)="submitIn()">
+            <label class="grid gap-2 text-sm font-bold">Work email<input class="field" type="email" formControlName="email" autocomplete="username"></label>
+            <label class="grid gap-2 text-sm font-bold">Password<input class="field" type="password" formControlName="password" autocomplete="current-password"></label>
+            @if (error()) { <p class="text-sm text-red-700">{{ error() }}</p> }
+            <button class="rounded-full bg-black text-white font-bold py-4 hover:bg-accent hover:text-black" type="submit" [disabled]="busy()">Sign in</button>
+          </form>
+          <p class="mt-5 rounded-2xl border border-accent bg-note p-4 text-sm leading-relaxed">
+            Employee: employee&#64;daataadirect.com / Password123
+          </p>
+          <p class="mt-4 text-sm">
+            <button type="button" class="bg-transparent p-0 font-bold" (click)="setMode('up')">Create an account</button>
+          </p>
+        </div>
+      } @else if (portal() === 'employee') {
+        <div class="auth-pane is-up">
+          <h3 class="mt-6 text-4xl font-black tracking-tight">Create account</h3>
+          <p class="mt-2 text-black/60">Sign up only works for an active staff email. Admin accounts are created by the company.</p>
+          <form class="mt-6 grid gap-4" [formGroup]="signUp" (ngSubmit)="submitUp()">
+            <div class="grid grid-cols-2 gap-3">
+              <label class="grid gap-2 text-sm font-bold">First name<input class="field" formControlName="first_name"></label>
+              <label class="grid gap-2 text-sm font-bold">Last name<input class="field" formControlName="last_name"></label>
+            </div>
+            <label class="grid gap-2 text-sm font-bold">Work email<input class="field" type="email" formControlName="email"></label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="grid gap-2 text-sm font-bold">Employee ID<input class="field" formControlName="employee_code"></label>
+              <label class="grid gap-2 text-sm font-bold">Department
+                <select class="field" formControlName="department">
+                  @for (item of departments; track item) { <option [value]="item">{{ item }}</option> }
+                </select>
+              </label>
+            </div>
+            <label class="grid gap-2 text-sm font-bold">Password<input class="field" type="password" formControlName="password" autocomplete="new-password"></label>
+            @if (error()) { <p class="text-sm text-red-700">{{ error() }}</p> }
+            <button class="rounded-full bg-black text-white font-bold py-4 hover:bg-accent hover:text-black" type="submit" [disabled]="busy()">Create account</button>
+          </form>
+          <p class="mt-4 text-sm">
+            <button type="button" class="bg-transparent p-0 font-bold" (click)="setMode('in')">Back to sign in</button>
+          </p>
+        </div>
+      } @else {
+        <div class="auth-pane is-up">
+          <h3 class="mt-6 text-4xl font-black tracking-tight">Sign in</h3>
+          <p class="mt-2 text-black/60">Use the company admin account. Staff accounts use Employee login.</p>
+          <form class="mt-6 grid gap-4" [formGroup]="adminIn" (ngSubmit)="submitAdmin()">
+            <label class="grid gap-2 text-sm font-bold">Admin email
+              <input class="field" type="email" formControlName="email" autocomplete="username" placeholder="admin@daataadirect.com">
+            </label>
+            <label class="grid gap-2 text-sm font-bold">Password
+              <input class="field" type="password" formControlName="password" autocomplete="current-password">
+            </label>
+            @if (error()) { <p class="text-sm text-red-700">{{ error() }}</p> }
+            <button class="rounded-full bg-black text-white font-bold py-4 hover:bg-accent hover:text-black" type="submit" [disabled]="busy()">Sign in</button>
+          </form>
+          <p class="mt-5 rounded-2xl border border-accent bg-note p-4 text-sm leading-relaxed">
+            Admin: admin&#64;daataadirect.com / Password123
+          </p>
+        </div>
+      }
+    </div>
+  </section>
+</div>

@@ -1,0 +1,37 @@
+<app-site-header [services]="services" />
+<main class="reviews-page">
+  <div class="reviews-copy">
+    <p class="reviews-kicker">Client reviews</p>
+    <h1>Honest reviews. <em>Measured results.</em> Lasting partnerships.</h1>
+    <p class="reviews-lede">See what teams say about working with Daataa Direct Limited on data, campaigns and remote delivery from Rawalpindi.</p>
+    <div class="reviews-actions">
+      <a routerLink="/contact" class="reviews-primary">Start your project <span aria-hidden="true">→</span></a>
+      <a routerLink="/contact" class="reviews-secondary">Contact us</a>
+    </div>
+    <div class="reviews-rate">
+      <p aria-label="5 stars">★★★★★</p>
+      <div>
+        <strong>5-star client notes</strong>
+        <small>Feedback from teams we work with remotely.</small>
+      </div>
+    </div>
+  </div>
+  <div class="review-stack">
+    @if (!reviews().length) {
+      <p class="review-quote">Reviews will appear here.</p>
+    }
+    @for (item of reviews(); track item.id) {
+      <article class="review-card">
+        <header>
+          <span class="review-avatar" aria-hidden="true">{{ item.role.slice(0, 1) }}</span>
+          <div>
+            <strong>{{ item.role }}</strong>
+            <small>{{ item.place }}</small>
+          </div>
+        </header>
+        <p class="review-stars" [attr.aria-label]="item.stars + ' stars'">{{ starLine(item.stars) }}</p>
+        <p class="review-quote">“{{ item.quote }}”</p>
+      </article>
+    }
+  </div>
+</main>

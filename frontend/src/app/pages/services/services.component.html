@@ -1,0 +1,31 @@
+<app-site-header [services]="services" />
+<main class="services-page">
+  <header class="services-hero">
+    <p class="page-kicker">Services</p>
+    <h1>Operations, commerce and technology.</h1>
+    <p class="page-lede">Daataa Direct Limited covers the work around a business: production, marketing, e-commerce listings, IT and the checks behind them. The team is in Rawalpindi. Client work is delivered remotely.</p>
+  </header>
+  <ul class="services-facts">
+    <li>
+      <strong>Remote</strong>
+      <span>Projects are delivered online, so the client does not need to be in the same city.</span>
+    </li>
+    <li>
+      <strong>Rawalpindi</strong>
+      <span>The office is in Pakistan. Hours run from 11am to 8pm, Pakistan time.</span>
+    </li>
+    <li>
+      <strong>One working day</strong>
+      <span>Fill in the contact form. We reply within one working day at {{ contactEmail }}.</span>
+    </li>
+  </ul>
+  <app-service-catalogue />
+  <section class="services-close">
+    <div>
+      <p class="page-kicker">Next step</p>
+      <h2>Tell us who you want to reach.</h2>
+      <p>Share the audience and the result. We reply with a clear next step, not a generic pitch.</p>
+    </div>
+    <a routerLink="/contact" class="page-cta">Start your project</a>
+  </section>
+</main>

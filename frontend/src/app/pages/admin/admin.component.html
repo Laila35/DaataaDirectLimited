@@ -1,0 +1,448 @@
+<div class="min-h-screen grid lg:grid-cols-[250px_1fr] bg-[#f5f5f8]">
+  <aside class="bg-black text-white p-6 flex lg:flex-col gap-4 overflow-auto">
+    <a routerLink="/" class="shrink-0" aria-label="Daataa Direct home">
+      <img src="/logo.jpeg" alt="Daataa Direct" class="w-14 h-14 rounded-full object-cover ring-2 ring-white/80">
+    </a>
+    <nav class="flex lg:flex-col gap-1 flex-1">
+      @for (item of [
+        ['overview', 'Overview'],
+        ['applications', 'Applications'],
+        ['employees', 'Employees'],
+        ['jobs', 'Job posts'],
+        ['about', 'About us'],
+        ['faqs', 'FAQs'],
+        ['reviews', 'Reviews'],
+        ['settings', 'Settings']
+      ]; track item[0]) {
+        <button type="button" class="text-left font-semibold px-4 py-3 rounded-full text-white/75 hover:bg-white/10 hover:text-white whitespace-nowrap" [class.!bg-white]="panel() === item[0]" [class.!text-black]="panel() === item[0]" (click)="panel.set($any(item[0]))">{{ item[1] }}</button>
+      }
+    </nav>
+    <button type="button" class="border border-white/40 rounded-full px-4 py-3 font-semibold" (click)="signOut()">Sign out</button>
+  </aside>
+  <section class="px-6 md:px-10 pb-16">
+    <header class="flex items-center justify-between gap-4 py-7 flex-wrap">
+      <h1 class="text-4xl font-black tracking-tight">{{ labels[panel()] }}</h1>
+      <div class="flex items-center gap-3">
+        <span class="rounded-full border border-accent bg-note px-4 py-2 text-sm font-semibold">{{ auth.user()?.first_name }} {{ auth.user()?.last_name }}</span>
+        <span class="w-11 h-11 rounded-full bg-black text-white grid place-items-center font-bold">AD</span>
+      </div>
+    </header>
+    @if (notice()) { <p class="mb-4 rounded-2xl border border-accent bg-note px-4 py-3">{{ notice() }}</p> }
+    @if (panel() === 'overview') {
+      <div class="overview">
+        <section class="ledger">
+          @for (card of statCards(); track card.label) {
+            <button type="button" (click)="panel.set(card.panel)">
+              <b>{{ card.value }}</b>
+              <span>{{ card.label }}</span>
+            </button>
+          }
+        </section>
+
+        <div class="board">
+          <section class="desk-card dossier">
+            <div class="overview-head">
+              <p class="desk-kicker">Inbox</p>
+              <button type="button" class="overview-link" (click)="panel.set('applications')">All applications</button>
+            </div>
+            @if (recentApps()[0]; as lead) {
+              <button type="button" class="dossier-body" (click)="openApplication(lead)">
+                <span class="avatar avatar-lg">{{ initials(lead.name) }}</span>
+                <span class="dossier-id">
+                  <strong>{{ lead.name }}</strong>
+                  <em>{{ lead.position }}</em>
+                </span>
+                <span class="status-pill">{{ lead.status }}</span>
+              </button>
+              <dl class="dossier-facts">
+                <div><dt>Email</dt><dd>{{ show(lead.email) }}</dd></div>
+                <div><dt>Phone</dt><dd>{{ show(lead.phone) }}</dd></div>
+                <div><dt>City</dt><dd>{{ show(lead.city) }}</dd></div>
+                <div><dt>Applied</dt><dd>{{ lead.created_at | date:'d MMM y' }}</dd></div>
+              </dl>
+            } @else {
+              <p class="desk-note">No applications yet. The newest one will open here.</p>
+            }
+          </section>
+          <section class="desk-card">
+            <div class="overview-head">
+              <p class="desk-kicker">Careers</p>
+              <button type="button" class="overview-link" (click)="panel.set('jobs')">Manage</button>
+            </div>
+            <h2 class="board-title">Open roles</h2>
+            @if (!openRoles().length) {
+              <p class="desk-note">No open roles yet.</p>
+            }
+            <ol class="role-index">
+              @for (job of openRoles(); track job.id; let i = $index) {
+                <li>
+                  <button type="button" (click)="editJob(job)">
+                    <span>{{ (i + 1).toString().padStart(2, '0') }}</span>
+                    <b>{{ job.title }}</b>
+                    <small>{{ job.department }} · {{ job.workplace }}</small>
+                  </button>
+                </li>
+              }
+            </ol>
+          </section>
+        </div>
+        <section class="desk-card band">
+          <div class="overview-head">
+            <p class="desk-kicker">Hiring</p>
+          </div>
+          <div class="meter">
+            @for (item of pipeline(); track item.status) {
+              <button type="button" [class.is-live]="item.count > 0" (click)="panel.set('applications')">
+                <b>{{ item.count }}</b>
+                <span>{{ item.status }}</span>
+              </button>
+            }
+          </div>
+        </section>
+        <section class="desk-card band">
+          <div class="overview-head">
+            <p class="desk-kicker">People</p>
+            <button type="button" class="overview-link" (click)="panel.set('employees')">View team</button>
+          </div>
+          @if (!team().length) {
+            <p class="desk-note">No employees yet.</p>
+          }
+          <div class="crew">
+            @for (person of team(); track person.id) {
+              <button type="button" (click)="panel.set('employees')">
+                <span class="avatar">{{ initials(person.name) }}</span>
+                <span>
+                  <b>{{ person.name }}</b>
+                  <small>{{ person.role_title }} · {{ person.department }}</small>
+                </span>
+              </button>
+            }
+          </div>
+        </section>
+      </div>
+    }
+
+    @if (panel() === 'applications') {
+      <div class="job-desk app-desk">
+        <div class="desk-card app-list">
+          <p class="desk-kicker">Inbox</p>
+          <h2>Who applied</h2>
+          <p class="desk-note">Each CV is scored against the role as soon as it is sent. A match of 50% or more enters the hiring desk. Under 30% is not qualified.</p>
+          @if (!applications().length) {
+            <p class="desk-note">No applications yet. They appear here as soon as someone applies on Careers.</p>
+          }
+          @for (row of applications(); track row.id) {
+            <button type="button" class="app-row" [class.is-on]="selected()?.id === row.id" (click)="selectedId.set(row.id)">
+              <b>{{ row.name }}</b>
+              <em>{{ row.status }}</em>
+              <span>{{ row.position }}</span>
+              <small>{{ row.screen_decision ? row.match_score + '% match' : (row.created_at | date:'d MMM y') }}</small>
+            </button>
+          }
+        </div>
+        @if (selected(); as app) {
+          <article class="desk-card app-detail">
+            <div class="app-head">
+              <div class="app-id">
+                <p class="desk-kicker">{{ app.created_at | date:'d MMM y, HH:mm' }}</p>
+                <h2>{{ app.name }}</h2>
+                <p class="desk-note">{{ app.position }}</p>
+              </div>
+              <div class="app-tools">
+                <select class="app-status" aria-label="Status" (change)="setStatus(app, $any($event.target).value)">
+                  @for (status of statuses; track status) {
+                    <option [value]="status" [selected]="status === app.status">{{ status }}</option>
+                  }
+                </select>
+                <button type="button" class="app-delete" (click)="removeApplication(app)">Delete</button>
+              </div>
+            </div>
+
+            @if (app.screen_decision) {
+              <section class="ats-card" [attr.data-decision]="app.screen_decision">
+                <div>
+                  <p>ATS match</p>
+                  <strong>{{ app.match_score }}%</strong>
+                  <em>{{ app.screen_decision }}</em>
+                </div>
+                <p>{{ app.screen_message }}</p>
+                @if (app.matched_skills.length) {
+                  <p class="ats-label">Matched</p>
+                  <div class="ats-chips">@for (skill of app.matched_skills; track skill) { <span>{{ skill }}</span> }</div>
+                }
+                @if (app.missing_skills.length) {
+                  <p class="ats-label">Missing</p>
+                  <div class="ats-chips">@for (skill of app.missing_skills; track skill) { <span>{{ skill }}</span> }</div>
+                }
+              </section>
+            }
+            <h3>Personal details</h3>
+            <dl class="detail-grid">
+              <div><dt>Email</dt><dd>{{ show(app.email) }}</dd></div>
+              <div><dt>Phone</dt><dd>{{ show(app.phone) }}</dd></div>
+            </dl>
+            <h3>Address</h3>
+            <dl class="detail-grid">
+              <div><dt>Street</dt><dd>{{ show(app.street) }}</dd></div>
+              <div><dt>City</dt><dd>{{ show(app.city) }}</dd></div>
+              <div><dt>State or province</dt><dd>{{ show(app.region) }}</dd></div>
+              <div><dt>Postal code</dt><dd>{{ show(app.postal_code) }}</dd></div>
+              <div><dt>Country</dt><dd>{{ show(app.country) }}</dd></div>
+            </dl>
+            <h3>Social links</h3>
+            <dl class="detail-grid">
+              <div><dt>LinkedIn</dt><dd>@if (app.linkedin) { <a [href]="linkHref(app.linkedin)" target="_blank" rel="noopener">{{ app.linkedin }}</a> } @else { — }</dd></div>
+              <div><dt>Website</dt><dd>@if (app.website) { <a [href]="linkHref(app.website)" target="_blank" rel="noopener">{{ app.website }}</a> } @else { — }</dd></div>
+              <div><dt>GitHub</dt><dd>@if (app.github) { <a [href]="linkHref(app.github)" target="_blank" rel="noopener">{{ app.github }}</a> } @else { — }</dd></div>
+              <div><dt>Other</dt><dd>@if (app.other_link) { <a [href]="linkHref(app.other_link)" target="_blank" rel="noopener">{{ app.other_link }}</a> } @else { — }</dd></div>
+            </dl>
+
+            <h3>Experience</h3>
+            <dl class="detail-grid">
+              <div><dt>Years</dt><dd>{{ show(app.experience) }}</dd></div>
+              <div><dt>Employer</dt><dd>{{ show(app.employer) }}</dd></div>
+              <div><dt>Expected salary</dt><dd>{{ show(app.salary) }}</dd></div>
+              <div><dt>Available from</dt><dd>{{ show(app.available_from) }}</dd></div>
+              <div><dt>Heard about us</dt><dd>{{ show(app.heard_from) }}</dd></div>
+            </dl>
+
+            <h3>Cover letter</h3>
+            <p class="cover-copy">{{ show(app.cover_letter) }}</p>
+
+            <h3>CV</h3>
+            @if (app.cv_filename) {
+              <button type="button" class="cv-download" (click)="downloadCv(app)">Download CV</button>
+            } @else {
+              <p class="desk-note">No CV was uploaded with this application.</p>
+            }
+          </article>
+        }
+      </div>
+    }
+
+    @if (panel() === 'employees') {
+      <form class="bg-white border border-black/15 rounded-[28px] p-6 grid md:grid-cols-5 gap-3 mb-4" [formGroup]="employeeForm" (ngSubmit)="addEmployee()">
+        <input class="field" placeholder="Name" formControlName="name">
+        <input class="field" placeholder="Email" formControlName="email">
+        <input class="field" placeholder="Department" formControlName="department">
+        <input class="field" placeholder="Role" formControlName="role_title">
+        <button class="rounded-full bg-black text-white font-bold" type="submit">Add</button>
+      </form>
+      <div class="bg-white border border-black/15 rounded-[28px] p-6 overflow-x-auto">
+        <table class="w-full min-w-[640px] text-left">
+          <thead class="text-sm text-black/50"><tr><th class="py-3">Name</th><th>Department</th><th>Role</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            @for (row of employees(); track row.id) {
+              <tr class="border-t border-black/10">
+                <td class="py-4">{{ row.name }}</td>
+                <td>{{ row.department }}</td>
+                <td>{{ row.role_title }}</td>
+                <td><span class="rounded-full bg-black text-white text-xs font-bold px-3 py-1">{{ row.status }}</span></td>
+                <td><button type="button" class="font-bold" (click)="removeEmployee(row)">Delete</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @if (panel() === 'jobs') {
+      <div class="job-desk">
+        <form class="desk-card" [formGroup]="jobForm" (ngSubmit)="saveJob()">
+          <p class="desk-kicker">Careers</p>
+          <h2>{{ editingJob() ? 'Edit job post' : 'Post a job' }}</h2>
+          <p class="desk-note">The post is open only between these times. After the closing time it stays closed, on Careers and for new applications.</p>
+          <label>Role title<input class="field" formControlName="title" placeholder="Campaign Manager"></label>
+          <div class="desk-grid">
+            <label>Department<input class="field" formControlName="department" placeholder="Marketing"></label>
+            <label>Level
+              <select class="field" formControlName="level">
+                @for (item of levels; track item) { <option [value]="item">{{ item }}</option> }
+              </select>
+            </label>
+            <label>Type
+              <select class="field" formControlName="employment_type">
+                @for (item of types; track item) { <option [value]="item">{{ item }}</option> }
+              </select>
+            </label>
+            <label>Workplace
+              <select class="field" formControlName="workplace">
+                @for (item of workplaces; track item) { <option [value]="item">{{ item }}</option> }
+              </select>
+            </label>
+            <label>Applications open<input class="field" type="datetime-local" formControlName="opens_at"></label>
+            <label>Applications close<input class="field" type="datetime-local" formControlName="closes_at"></label>
+          </div>
+          <label>Summary<textarea class="field min-h-24" formControlName="summary" placeholder="What this role is for"></textarea></label>
+          <label>What they will do<textarea class="field min-h-28" formControlName="responsibilities" placeholder="One line per task"></textarea></label>
+          <label>What you look for<textarea class="field min-h-28" formControlName="requirements" placeholder="One line per requirement"></textarea></label>
+          <div class="desk-actions">
+            <button class="rounded-full bg-black text-white font-bold px-6 py-3 hover:bg-accent hover:text-black" type="submit">{{ editingJob() ? 'Update post' : 'Post job' }}</button>
+            @if (editingJob()) {
+              <button class="rounded-full border border-black px-6 py-3 font-bold" type="button" (click)="clearJob()">Cancel</button>
+            }
+          </div>
+        </form>
+        <div class="desk-card">
+          <p class="desk-kicker">Careers</p>
+          <h2>Job posts</h2>
+          @if (!jobs().length) {
+            <p class="desk-note">No open roles yet. Post the first one on the left.</p>
+          }
+          @for (job of jobs(); track job.id) {
+            <article class="role-card">
+              <div class="role-top">
+                <div>
+                  <b>{{ job.title }}</b>
+                  <p>{{ job.department }} · {{ job.level }} · {{ job.workplace }}</p>
+                  <p>{{ job.opens_at ? (job.opens_at | date:'d MMM y, h:mm a') : 'No opening time' }} – {{ job.closes_at ? (job.closes_at | date:'d MMM y, h:mm a') : 'No closing time' }}</p>
+                </div>
+                <div class="role-actions">
+                  @if (job.closed) {
+                    <span class="role-closed">Closed</span>
+                  }
+                  <button type="button" (click)="editJob(job)">Edit</button>
+                  @if (!job.closed) {
+                    <button type="button" class="is-quiet" (click)="closeJob(job)">Close</button>
+                  }
+                </div>
+              </div>
+              <small>{{ job.summary }}</small>
+            </article>
+          }
+          <a class="desk-link" routerLink="/careers">View the Careers page</a>
+        </div>
+      </div>
+    }
+
+    @if (panel() === 'about') {
+      <form class="desk-card about-editor" [formGroup]="aboutForm" (ngSubmit)="saveAbout()">
+        <p class="desk-kicker">Public page</p>
+        <h2>About us</h2>
+        <p class="desk-note">Saving here updates the About page and the About section on the home page.</p>
+        <div class="desk-grid">
+          <label>Small label<input class="field" formControlName="kicker"></label>
+          <label>Headline<input class="field" formControlName="title"></label>
+        </div>
+        <label>Opening paragraph<textarea class="field min-h-28" formControlName="intro"></textarea></label>
+        <label>Second paragraph<textarea class="field min-h-24" formControlName="detail"></textarea></label>
+        <label>How we work heading<input class="field" formControlName="work_title"></label>
+        <div formArrayName="steps" class="step-list">
+          @for (group of aboutSteps.controls; track $index; let i = $index) {
+            <div class="step-row" [formGroupName]="i">
+              <span>{{ i + 1 }}</span>
+              <input class="field" formControlName="title" placeholder="Step title">
+              <input class="field" formControlName="text" placeholder="What happens in this step">
+              <button type="button" (click)="removeAboutStep(i)" [disabled]="aboutSteps.length < 2">Remove</button>
+            </div>
+          }
+        </div>
+        <div class="desk-actions">
+          <button class="rounded-full border border-black px-6 py-3 font-bold" type="button" (click)="addAboutStep()">Add step</button>
+          <button class="rounded-full bg-black text-white font-bold px-6 py-3 hover:bg-accent hover:text-black" type="submit">Save About us</button>
+          <a class="desk-link" routerLink="/about">View the About page</a>
+        </div>
+      </form>
+    }
+
+    @if (panel() === 'faqs') {
+      <div class="job-desk">
+        <form class="desk-card" [formGroup]="faqForm" (ngSubmit)="saveFaq()">
+          <p class="desk-kicker">Public page</p>
+          <h2>{{ editingFaq() ? 'Edit FAQ' : 'New FAQ' }}</h2>
+          <p class="desk-note">Saving here updates the FAQs on the home page and the FAQs page.</p>
+          <label>Question<input class="field" formControlName="question"></label>
+          <label>Answer<textarea class="field min-h-28" formControlName="answer"></textarea></label>
+          <div class="desk-actions">
+            <button class="rounded-full bg-black text-white font-bold px-6 py-3 hover:bg-accent hover:text-black" type="submit">{{ editingFaq() ? 'Save FAQ' : 'Add FAQ' }}</button>
+            @if (editingFaq()) {
+              <button class="rounded-full border border-black px-6 py-3 font-bold" type="button" (click)="clearFaq()">Cancel</button>
+            }
+            <a class="desk-link" routerLink="/faqs">View the FAQs page</a>
+          </div>
+        </form>
+        <div class="desk-card">
+          <p class="desk-kicker">FAQs</p>
+          <h2>Published questions</h2>
+          @if (!faqs().length) {
+            <p class="desk-note">No questions yet. Add the first one on the left.</p>
+          }
+          @for (item of faqs(); track item.id) {
+            <article class="role-card">
+              <div class="role-top">
+                <div>
+                  <b>{{ item.question }}</b>
+                  <p>{{ item.answer }}</p>
+                </div>
+                <div class="role-actions">
+                  <button type="button" (click)="editFaq(item)">Edit</button>
+                  <button type="button" class="is-quiet" (click)="removeFaq(item)">Remove</button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    }
+
+    @if (panel() === 'reviews') {
+      <div class="job-desk">
+        <form class="desk-card" [formGroup]="reviewForm" (ngSubmit)="saveReview()">
+          <p class="desk-kicker">Public page</p>
+          <h2>{{ editingReview() ? 'Edit review' : 'New review' }}</h2>
+          <p class="desk-note">Saving here updates the reviews on the home page and the Reviews page.</p>
+          <label>Review<textarea class="field min-h-28" formControlName="quote"></textarea></label>
+          <div class="desk-grid">
+            <label>Role<input class="field" formControlName="role" placeholder="Marketing lead"></label>
+            <label>Company<input class="field" formControlName="place" placeholder="Retail brand"></label>
+          </div>
+          <label>Stars
+            <select class="field" formControlName="stars">
+              @for (n of starChoices; track n) {
+                <option [ngValue]="n">{{ n }} {{ n === 1 ? 'star' : 'stars' }}</option>
+              }
+            </select>
+          </label>
+          <div class="desk-actions">
+            <button class="rounded-full bg-black text-white font-bold px-6 py-3 hover:bg-accent hover:text-black" type="submit">{{ editingReview() ? 'Save review' : 'Add review' }}</button>
+            @if (editingReview()) {
+              <button class="rounded-full border border-black px-6 py-3 font-bold" type="button" (click)="clearReview()">Cancel</button>
+            }
+            <a class="desk-link" routerLink="/reviews">View the Reviews page</a>
+          </div>
+        </form>
+        <div class="desk-card">
+          <p class="desk-kicker">Reviews</p>
+          <h2>Published reviews</h2>
+          @if (!reviews().length) {
+            <p class="desk-note">No reviews yet. Add the first one on the left.</p>
+          }
+          @for (item of reviews(); track item.id) {
+            <article class="role-card">
+              <div class="role-top">
+                <div>
+                  <b>{{ item.role }}</b>
+                  <p>{{ starLine(item.stars) }}<span> · {{ item.place || 'No company' }}</span></p>
+                </div>
+                <div class="role-actions">
+                  <button type="button" (click)="editReview(item)">Edit</button>
+                  <button type="button" class="is-quiet" (click)="removeReview(item)">Remove</button>
+                </div>
+              </div>
+              <small>{{ item.quote }}</small>
+            </article>
+          }
+        </div>
+      </div>
+    }
+
+    @if (panel() === 'settings') {
+      <form class="bg-white border border-black/15 rounded-[28px] p-6 grid gap-4 max-w-xl" [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+        <label class="grid gap-2 text-sm font-bold">Company name<input class="field" formControlName="company_name"></label>
+        <label class="grid gap-2 text-sm font-bold">Accent colour<input class="field" formControlName="accent"></label>
+        <label class="grid gap-2 text-sm font-bold">Contact email<input class="field" formControlName="contact_email"></label>
+        <label class="flex items-center gap-3 font-bold"><input type="checkbox" formControlName="careers_open"> Careers are open</label>
+        <button class="justify-self-start rounded-full bg-black text-white font-bold px-6 py-3 hover:bg-accent hover:text-black" type="submit">Save changes</button>
+      </form>
+    }
+  </section>
+</div>

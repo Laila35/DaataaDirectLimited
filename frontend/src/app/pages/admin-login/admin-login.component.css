@@ -1,0 +1,99 @@
+.auth-side {
+  background:
+    radial-gradient(520px 360px at 30% 58%, rgba(163, 132, 245, 0.34), transparent 62%),
+    #140c22;
+}
+
+.auth-globe {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.auth-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 28rem;
+  animation: rise-in 0.75s ease both;
+}
+
+.auth-panel { animation: rise-in 0.75s ease 0.08s both; }
+
+@keyframes rise-in {
+  from { opacity: 0; translate: 0 16px; }
+  to { opacity: 1; translate: 0; }
+}
+
+.mode-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: max-content;
+  min-width: 220px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #efeff4;
+}
+
+.mode-pill {
+  position: absolute;
+  z-index: 0;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 999px;
+  background: #111;
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mode-switch.is-up .mode-pill {
+  transform: translateX(100%);
+}
+
+.mode-switch button {
+  position: relative;
+  z-index: 1;
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  padding: 8px 22px;
+  font: inherit;
+  font-weight: 700;
+  color: #111;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.mode-switch button.is-on {
+  color: #fff;
+}
+
+.auth-pane {
+  animation: pane-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.auth-pane.is-up {
+  animation-name: pane-in-right;
+}
+
+@keyframes pane-in {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes pane-in-right {
+  from { opacity: 0; transform: translateX(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-copy,
+  .auth-panel,
+  .auth-pane { animation: none; }
+  .mode-pill,
+  .mode-switch button { transition: none; }
+}

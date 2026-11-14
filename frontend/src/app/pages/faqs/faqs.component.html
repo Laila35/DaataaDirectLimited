@@ -1,0 +1,25 @@
+<app-site-header [services]="services" />
+<main class="px-[6vw] py-16">
+  <div class="mx-auto max-w-3xl text-center">
+  <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Company</p>
+  <h1 class="mx-auto mt-3 max-w-[12ch] text-[clamp(48px,7vw,84px)] font-black leading-none tracking-tight">FAQs</h1>
+  <p class="mx-auto mt-5 max-w-xl text-lg text-black/60">Answers about Daataa Direct Limited, our Rawalpindi office, and how remote work with us runs.</p>
+  <div class="mt-12 grid gap-3 text-left">
+    @if (!faqs().length) {
+      <p class="rounded-[24px] border border-black/10 bg-white px-6 py-5 text-black/60">Questions will appear here.</p>
+    }
+    @for (item of faqs(); track item.id; let i = $index) {
+      <article class="rounded-[24px] border border-black/10 bg-white">
+        <button type="button" class="flex w-full items-center justify-between gap-4 px-6 py-5 text-left font-bold" (click)="toggle(i)" [attr.aria-expanded]="open() === i">
+          <span>{{ item.question }}</span>
+          <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent text-lg">{{ open() === i ? '–' : '+' }}</span>
+        </button>
+        @if (open() === i) {
+          <p class="px-6 pb-6 leading-relaxed text-black/70">{{ item.answer }}</p>
+        }
+      </article>
+    }
+  </div>
+  <a routerLink="/contact" class="mt-10 inline-flex rounded-full bg-accent px-6 py-3 font-bold">Start your project</a>
+  </div>
+</main>

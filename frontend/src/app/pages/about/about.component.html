@@ -2,32 +2,87 @@
   <div class="about-bg" aria-hidden="true">
     <span class="wash wash-a"></span>
     <span class="wash wash-b"></span>
-    <span class="ring ring-a"></span>
-    <span class="ring ring-b"></span>
-    <span class="ring ring-c"></span>
-    <span class="glass glass-a"></span>
-    <span class="glass glass-b"></span>
   </div>
   <app-site-header [services]="services" />
   <main class="about-main">
-    <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">{{ about().kicker }}</p>
-    <h1 class="mt-3 max-w-[12ch] text-[clamp(48px,7vw,84px)] font-black leading-none tracking-tight">{{ about().title }}</h1>
-    <p class="mt-6 max-w-2xl text-lg leading-relaxed text-black/60">{{ about().intro }}</p>
-    <p class="mt-4 max-w-2xl text-lg leading-relaxed text-black/60">{{ about().detail }}</p>
-    <section id="work" class="work-path">
-      <h2>{{ about().work_title }}</h2>
-      <ol class="work-rail">
-        @for (step of about().steps; track step.n) {
-          <li class="work-step">
-            <span class="work-node">{{ step.n }}</span>
-            <article class="work-card">
-              <h3>{{ step.title }}</h3>
-              <p>{{ step.text }}</p>
-            </article>
+    <h1 class="about-title">About Daataa Direct</h1>
+    <p class="about-lede">Daataa Direct Limited holds a company’s fields in one place: software systems, legal, logistics, graphic design, and the wider work of operations, commerce and technology. The team is in Rawalpindi. The work is delivered remotely.</p>
+
+    <section class="orbit" aria-label="What Daataadirect brings together">
+      <p class="orbit-kicker">Our fields</p>
+      <div class="orbit-stage">
+        <svg class="orbit-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          @for (line of lines; track line.id) {
+            <line [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" />
+          }
+        </svg>
+        <div class="orbit-hub">
+          <span class="orbit-valve" aria-hidden="true"></span>
+          <img src="/logo.jpeg" alt="Daataa Direct" class="orbit-logo">
+        </div>
+        <div class="orbit-pills">
+          @for (node of nodes; track node.label) {
+            <span class="orbit-pill" [style.left.%]="node.x" [style.top.%]="node.y" [style.animation-delay]="node.delay">{{ node.label }}</span>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="about-block">
+      <h2>Our story</h2>
+      <p>Daataa Direct Limited is based in Rawalpindi. We take on the parts of a business that need a steady team: software systems, graphic design, legal and trademark, shipping and logistics, accounts, and day-to-day operations.</p>
+      <p>Hours are 11am to 8pm, Pakistan time. We reply within one working day.</p>
+    </section>
+
+    <section id="fields" class="about-block">
+      <h2>Fields we cover</h2>
+      <p>Operations covers production, administration, procurement, shipping and logistics, human resources, accounts and tax, and legal and trademark.</p>
+      <p>Commerce covers marketing, sales, customer service, graphic design and e-commerce, including listings and new products.</p>
+      <p>Technology covers software systems, IT backup and troubleshooting, research and development, and quality assurance.</p>
+    </section>
+
+    <section class="about-block">
+      <h2>Why teams work with us</h2>
+      <ul>
+        <li>Software, legal, logistics and graphic design in one company</li>
+        <li>Operations, commerce and technology handled together</li>
+        <li>Remote delivery from the Rawalpindi team</li>
+        <li>A reply within one working day</li>
+      </ul>
+    </section>
+
+    <section class="about-block">
+      <h2>Our promise</h2>
+      <p>Each field stays clear. You know who is doing the work, and what finished looks like, before the team starts.</p>
+    </section>
+
+    <section class="about-block" id="work">
+      <h2>How we work</h2>
+      <ol class="step-row">
+        @for (step of steps; track step.n) {
+          <li>
+            <span>{{ step.n }}</span>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.text }}</p>
           </li>
         }
       </ol>
     </section>
-    <a routerLink="/contact" class="mt-10 inline-flex rounded-full bg-accent px-6 py-3 font-bold text-white">Start your project</a>
+
+    <section class="about-block">
+      <h2>Find us</h2>
+      <p>
+        @for (line of contact.address; track line) {
+          {{ line }}<br>
+        }
+      </p>
+      <p><a [href]="contact.phoneHref">{{ contact.phone }}</a></p>
+      <p><a [href]="'mailto:' + contact.email">{{ contact.email }}</a></p>
+    </section>
+
+    <div class="about-actions">
+      <a class="about-action" routerLink="/services">Our services</a>
+      <a class="about-action about-action-quiet" routerLink="/contact">Contact our team</a>
+    </div>
   </main>
 </div>

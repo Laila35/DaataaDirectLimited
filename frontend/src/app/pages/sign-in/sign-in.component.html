@@ -1,85 +1,100 @@
 <div class="min-h-screen grid lg:grid-cols-2">
   <aside class="auth-side text-white p-10 flex flex-col justify-end min-h-[280px] relative overflow-hidden">
     <app-data-globe [showLogo]="true" [logoUrl]="'/logo.jpeg'" class="auth-globe" />
-    <div class="auth-copy">
-      @if (portal() === 'employee') {
-        <h2 class="font-black tracking-tight leading-none text-5xl max-w-[10ch]">Your team, in one place.</h2>
-        <p class="mt-5 max-w-sm text-white/80 text-lg leading-relaxed">Sign in to manage campaigns, reports and company tools.</p>
-      } @else {
-        <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Daataa Direct Limited</p>
-        <h2 class="mt-4 font-black tracking-tight leading-none text-5xl max-w-[10ch]">Admin sign in</h2>
-        <p class="mt-5 max-w-sm text-white/80 text-lg leading-relaxed">The private desk for careers, the About page, and applications.</p>
-      }
-      <small class="mt-6 block text-white/50">© 2026 Daataa Direct Limited</small>
-    </div>
   </aside>
-  <section class="grid place-items-center p-8 relative bg-white text-black">
+  <section class="auth-panel">
     <a routerLink="/" class="absolute top-5 right-5 w-12 h-12 rounded-full border border-black grid place-items-center text-2xl" aria-label="Close">×</a>
-    <div class="w-full max-w-md">
-      <div class="mode-switch" [class.is-up]="portal() === 'admin'" role="tablist" aria-label="Login">
-        <span class="mode-pill" aria-hidden="true"></span>
-        <button type="button" role="tab" [attr.aria-selected]="portal() === 'employee'" [class.is-on]="portal() === 'employee'" (click)="setPortal('employee')">Employee login</button>
-        <button type="button" role="tab" [attr.aria-selected]="portal() === 'admin'" [class.is-on]="portal() === 'admin'" (click)="setPortal('admin')">Admin login</button>
-      </div>
-      @if (portal() === 'employee' && mode() === 'in') {
+    <div class="auth-card">
+      @if (mode() === 'reset') {
         <div class="auth-pane">
-          <h3 class="mt-6 text-4xl font-black tracking-tight">Sign in</h3>
-          <p class="mt-2 text-black/60">Active staff only. An admin email is not eligible on this form.</p>
-          <form class="mt-6 grid gap-4" [formGroup]="signIn" (ngSubmit)="submitIn()">
-            <label class="grid gap-2 text-sm font-bold">Work email<input class="field" type="email" formControlName="email" autocomplete="username"></label>
-            <label class="grid gap-2 text-sm font-bold">Password<input class="field" type="password" formControlName="password" autocomplete="current-password"></label>
-            @if (error()) { <p class="text-sm text-red-700">{{ error() }}</p> }
-            <button class="rounded-full bg-black text-white font-bold py-4 hover:bg-accent hover:text-black" type="submit" [disabled]="busy()">Sign in</button>
+          <h3 class="mt-6 text-4xl font-black tracking-tight">New password</h3>
+          <p class="mt-2 text-black/60">Choose a new password for this employee or admin account.</p>
+          <form class="auth-form" [formGroup]="resetForm" (ngSubmit)="submitReset()">
+            <label class="auth-fields">New password<input class="field" type="password" formControlName="password" autocomplete="new-password" placeholder="At least 8 characters"></label>
+            <label class="auth-fields">Confirm password<input class="field" type="password" formControlName="confirm" autocomplete="new-password" placeholder="Repeat the password"></label>
+            @if (error()) { <p class="auth-error is-full">{{ error() }}</p> }
+            <button class="auth-submit is-full" type="submit" [disabled]="busy()">Update password</button>
           </form>
-          <p class="mt-5 rounded-2xl border border-accent bg-note p-4 text-sm leading-relaxed">
-            Employee: employee&#64;daataadirect.com / Password123
-          </p>
-          <p class="mt-4 text-sm">
-            <button type="button" class="bg-transparent p-0 font-bold" (click)="setMode('up')">Create an account</button>
-          </p>
+          <p class="auth-links"><a routerLink="/sign-in">Back to sign in</a></p>
+        </div>
+      } @else if (mode() === 'forgot') {
+        <div class="auth-pane">
+          <h3 class="mt-6 text-4xl font-black tracking-tight">Forgot password</h3>
+          <p class="mt-2 text-black/60">Enter the email on the {{ portal() === 'admin' ? 'admin' : 'employee' }} account. We will send a link to choose a new password.</p>
+          <form class="auth-form" [formGroup]="forgot" (ngSubmit)="submitForgot()">
+            <label class="auth-fields is-full">Email<input class="field" type="email" formControlName="email" autocomplete="username" placeholder="Email"></label>
+            @if (error()) { <p class="auth-error is-full">{{ error() }}</p> }
+            @if (notice()) { <p class="auth-ok is-full">{{ notice() }}</p> }
+            <button class="auth-submit is-full" type="submit" [disabled]="busy()">Send reset email</button>
+          </form>
+          <p class="auth-links"><button type="button" (click)="setMode('in')">Back to sign in</button></p>
+        </div>
+      } @else if (portal() === 'employee' && mode() === 'up') {
+        <div class="auth-pane">
+          <p class="auth-kicker">Employee</p>
+          <h3 class="text-4xl font-black tracking-tight">Create account</h3>
+          <p class="mt-2 text-black/60">This creates a staff account.</p>
+          <form class="auth-form" [formGroup]="signUp" (ngSubmit)="submitUp()">
+            <label class="auth-fields">First name<input class="field" formControlName="first_name" autocomplete="given-name" placeholder="First name"></label>
+            <label class="auth-fields">Last name<input class="field" formControlName="last_name" autocomplete="family-name" placeholder="Last name"></label>
+            <label class="auth-fields is-full">Work email<input class="field" type="email" formControlName="email" autocomplete="username" placeholder="Work email"></label>
+            <label class="auth-fields">Password<input class="field" type="password" formControlName="password" autocomplete="new-password" placeholder="At least 8 characters"></label>
+            <label class="auth-fields">Confirm password<input class="field" type="password" formControlName="confirm" autocomplete="new-password" placeholder="Repeat the password"></label>
+            @if (error()) { <p class="auth-error is-full">{{ error() }}</p> }
+            <button class="auth-submit is-full" type="submit" [disabled]="busy()">Create account</button>
+          </form>
+          <p class="auth-links"><button type="button" (click)="setMode('in')">Back to sign in</button></p>
+        </div>
+      } @else if (portal() === 'admin' && mode() === 'up') {
+        <div class="auth-pane is-up">
+          <p class="auth-kicker">Admin</p>
+          <h3 class="text-4xl font-black tracking-tight">Create account</h3>
+          <p class="mt-2 text-black/60">This creates an admin account for the company desk.</p>
+          <form class="auth-form" [formGroup]="adminUp" (ngSubmit)="submitAdminUp()">
+            <label class="auth-fields">First name<input class="field" formControlName="first_name" autocomplete="given-name" placeholder="First name"></label>
+            <label class="auth-fields">Last name<input class="field" formControlName="last_name" autocomplete="family-name" placeholder="Last name"></label>
+            <label class="auth-fields is-full">Admin email<input class="field" type="email" formControlName="email" autocomplete="username" placeholder="Admin email"></label>
+            <label class="auth-fields">Password<input class="field" type="password" formControlName="password" autocomplete="new-password" placeholder="At least 8 characters"></label>
+            <label class="auth-fields">Confirm password<input class="field" type="password" formControlName="confirm" autocomplete="new-password" placeholder="Repeat the password"></label>
+            @if (error()) { <p class="auth-error is-full">{{ error() }}</p> }
+            <button class="auth-submit is-full" type="submit" [disabled]="busy()">Create account</button>
+          </form>
+          <p class="auth-links"><button type="button" (click)="setMode('in')">Back to sign in</button></p>
         </div>
       } @else if (portal() === 'employee') {
-        <div class="auth-pane is-up">
-          <h3 class="mt-6 text-4xl font-black tracking-tight">Create account</h3>
-          <p class="mt-2 text-black/60">Sign up only works for an active staff email. Admin accounts are created by the company.</p>
-          <form class="mt-6 grid gap-4" [formGroup]="signUp" (ngSubmit)="submitUp()">
-            <div class="grid grid-cols-2 gap-3">
-              <label class="grid gap-2 text-sm font-bold">First name<input class="field" formControlName="first_name"></label>
-              <label class="grid gap-2 text-sm font-bold">Last name<input class="field" formControlName="last_name"></label>
-            </div>
-            <label class="grid gap-2 text-sm font-bold">Work email<input class="field" type="email" formControlName="email"></label>
-            <div class="grid grid-cols-2 gap-3">
-              <label class="grid gap-2 text-sm font-bold">Employee ID<input class="field" formControlName="employee_code"></label>
-              <label class="grid gap-2 text-sm font-bold">Department
-                <select class="field" formControlName="department">
-                  @for (item of departments; track item) { <option [value]="item">{{ item }}</option> }
-                </select>
-              </label>
-            </div>
-            <label class="grid gap-2 text-sm font-bold">Password<input class="field" type="password" formControlName="password" autocomplete="new-password"></label>
-            @if (error()) { <p class="text-sm text-red-700">{{ error() }}</p> }
-            <button class="rounded-full bg-black text-white font-bold py-4 hover:bg-accent hover:text-black" type="submit" [disabled]="busy()">Create account</button>
+        <div class="auth-pane">
+          <p class="auth-kicker">Employee</p>
+          <h3 class="text-4xl font-black tracking-tight">Sign in</h3>
+          <p class="mt-2 text-black/60">Active staff only.</p>
+          <form class="auth-form" [formGroup]="signIn" (ngSubmit)="submitIn()">
+            <label class="auth-fields">Work email<input class="field" type="email" formControlName="email" autocomplete="username" placeholder="Work email"></label>
+            <label class="auth-fields">Password<input class="field" type="password" formControlName="password" autocomplete="current-password" placeholder="Password"></label>
+            @if (error()) { <p class="auth-error is-full">{{ error() }}</p> }
+            <button class="auth-submit is-full" type="submit" [disabled]="busy()">Sign in</button>
           </form>
-          <p class="mt-4 text-sm">
-            <button type="button" class="bg-transparent p-0 font-bold" (click)="setMode('in')">Back to sign in</button>
+          <p class="auth-links">
+            <button type="button" (click)="setMode('up')">Create account</button>
+            <button type="button" (click)="setMode('forgot')">Forgot password</button>
           </p>
         </div>
       } @else {
         <div class="auth-pane is-up">
-          <h3 class="mt-6 text-4xl font-black tracking-tight">Sign in</h3>
-          <p class="mt-2 text-black/60">Use the company admin account. Staff accounts use Employee login.</p>
-          <form class="mt-6 grid gap-4" [formGroup]="adminIn" (ngSubmit)="submitAdmin()">
-            <label class="grid gap-2 text-sm font-bold">Admin email
-              <input class="field" type="email" formControlName="email" autocomplete="username" placeholder="admin@daataadirect.com">
+          <p class="auth-kicker">Admin</p>
+          <h3 class="text-4xl font-black tracking-tight">Sign in</h3>
+          <p class="mt-2 text-black/60">Company admin account.</p>
+          <form class="auth-form" [formGroup]="adminIn" (ngSubmit)="submitAdmin()">
+            <label class="auth-fields">Admin email
+              <input class="field" type="email" formControlName="email" autocomplete="username" placeholder="Admin email">
             </label>
-            <label class="grid gap-2 text-sm font-bold">Password
-              <input class="field" type="password" formControlName="password" autocomplete="current-password">
+            <label class="auth-fields">Password
+              <input class="field" type="password" formControlName="password" autocomplete="current-password" placeholder="Password">
             </label>
-            @if (error()) { <p class="text-sm text-red-700">{{ error() }}</p> }
-            <button class="rounded-full bg-black text-white font-bold py-4 hover:bg-accent hover:text-black" type="submit" [disabled]="busy()">Sign in</button>
+            @if (error()) { <p class="auth-error is-full">{{ error() }}</p> }
+            <button class="auth-submit is-full" type="submit" [disabled]="busy()">Sign in</button>
           </form>
-          <p class="mt-5 rounded-2xl border border-accent bg-note p-4 text-sm leading-relaxed">
-            Admin: admin&#64;daataadirect.com / Password123
+          <p class="auth-links">
+            <button type="button" (click)="setMode('up')">Create account</button>
+            <button type="button" (click)="setMode('forgot')">Forgot password</button>
           </p>
         </div>
       }

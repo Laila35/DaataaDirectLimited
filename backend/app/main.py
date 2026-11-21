@@ -2,20 +2,24 @@ import json
 import logging
 import os
 import re
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta
+from typing import Literal
+from urllib.parse import quote
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 from .ats import score_application
-from .mailer import send_contact_email
+from .mailer import app_base_url, send_contact_email, send_reset_email, smtp_ready
 from .database import Base, SessionLocal, engine, get_db
-from .models import Application, ContactMessage, Employee, Faq, Job, Review, Setting, User, WhatsAppMessage
-from .security import create_session, get_current_user, hash_password, optional_user, require_admin, verify_password
+from .models import Application, ContactMessage, Employee, Faq, GalleryVideo, Job, PasswordReset, Review, SessionToken, Setting, User, WhatsAppMessage
+from .security import create_session, drop_sessions, get_current_user, hash_password, hash_token, optional_user, require_admin, require_staff, verify_password
 from .seed import seed
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "..", "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+GALLERY_DIR = os.path.join(UPLOAD_DIR, "gallery")
+os.makedirs(GALLERY_DIR, exist_ok=True)
 app = FastAPI(title="Daataa Direct API")
 app.add_middleware(
     CORSMiddleware,
@@ -33,6 +37,12 @@ class RegisterBody(BaseModel):
     email: EmailStr
     employee_code: str = ""
     department: str = "Other"
+    password: str = Field(min_length=8)
+    role: Literal["employee", "admin"] = "employee"
+class ForgotBody(BaseModel):
+    email: EmailStr
+class ResetBody(BaseModel):
+    token: str = Field(min_length=20, max_length=200)
     password: str = Field(min_length=8)
 WHATSAPP_NUMBER = "923198090911"
 class WhatsAppBody(BaseModel):
@@ -337,11 +347,50 @@ def register(body: RegisterBody, db: Session = Depends(get_db)):
         password_hash=hash_password(body.password),
         first_name=body.first_name.strip(),
         last_name=body.last_name.strip(),
-        role="employee",
+        role=body.role,
         employee_code=body.employee_code.strip(),
-        department=body.department,
+        department=(body.department or "Other").strip() or "Other",
     )
     db.add(user)
+    db.commit()
+    db.refresh(user)
+    token = create_session(db, user)
+    return {"token": token, "user": user_out(user)}
+@app.post("/api/auth/forgot")
+def forgot_password(body: ForgotBody, db: Session = Depends(get_db)):
+    if not smtp_ready():
+        raise HTTPException(status_code=503, detail="Password reset by email is not set up yet. Add the mail password in the server settings.")
+    user = db.query(User).filter(User.email == body.email.lower()).first()
+    if user is not None:
+        raw = secrets.token_urlsafe(32)
+        db.query(PasswordReset).filter(PasswordReset.user_id == user.id, PasswordReset.used == 0).update({PasswordReset.used: 1})
+        db.add(PasswordReset(
+            user_id=user.id,
+            token_hash=hash_token(raw),
+            expires_at=datetime.utcnow() + timedelta(hours=1),
+            used=0,
+        ))
+        db.commit()
+        link = f"{app_base_url()}/reset-password?token={quote(raw)}"
+        try:
+            sent = send_reset_email(user.email, user.first_name, link)
+        except Exception:
+            logging.getLogger("daataa.mail").exception("Password reset email failed")
+            sent = False
+        if not sent:
+            raise HTTPException(status_code=503, detail="The reset email could not be sent. Try again in a moment.")
+    return {"ok": True, "message": "If this email is on an account, we sent a link to choose a new password. It expires in one hour."}
+@app.post("/api/auth/reset")
+def reset_password(body: ResetBody, db: Session = Depends(get_db)):
+    row = db.query(PasswordReset).filter(PasswordReset.token_hash == hash_token(body.token), PasswordReset.used == 0).first()
+    if row is None or row.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has expired. Ask for a new one.")
+    user = db.query(User).filter(User.id == row.user_id).first()
+    if user is None:
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has expired. Ask for a new one.")
+    user.password_hash = hash_password(body.password)
+    row.used = 1
+    drop_sessions(db, user.id)
     db.commit()
     db.refresh(user)
     token = create_session(db, user)
@@ -759,3 +808,74 @@ def delete_review(review_id: int, db: Session = Depends(get_db), _: User = Depen
     db.delete(row)
     db.commit()
     return {"ok": True}
+def gallery_out(row: GalleryVideo) -> dict:
+    return {"id": row.id, "title": row.title, "created_at": row.created_at}
+def staff_from_token(token: str, db: Session) -> User:
+    row = db.query(SessionToken).filter(SessionToken.token == token.strip()).first()
+    if row is None or row.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=401, detail="Sign in required")
+    if row.user.role not in {"employee", "admin"}:
+        raise HTTPException(status_code=403, detail="Staff access required")
+    return row.user
+@app.get("/api/gallery")
+def list_gallery(db: Session = Depends(get_db), _: User = Depends(require_staff)):
+    rows = db.query(GalleryVideo).order_by(GalleryVideo.created_at.desc(), GalleryVideo.id.desc()).all()
+    return [gallery_out(row) for row in rows]
+@app.post("/api/gallery")
+async def create_gallery(
+    title: str = Form(...),
+    video: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    label = title.strip()
+    if not label:
+        raise HTTPException(status_code=422, detail="Add a title for the video.")
+    if not video.filename or not re.search(r"\.(mp4|webm|mov)$", video.filename, re.I):
+        raise HTTPException(status_code=422, detail="Video must be an MP4, WEBM, or MOV file.")
+    safe = re.sub(r"[^A-Za-z0-9._-]", "_", video.filename)
+    filename = f"{int(datetime.utcnow().timestamp())}_{safe}"
+    path = os.path.join(GALLERY_DIR, filename)
+    size = 0
+    limit = 80 * 1024 * 1024
+    too_big = False
+    with open(path, "wb") as handle:
+        while True:
+            chunk = await video.read(1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            if size > limit:
+                too_big = True
+                break
+            handle.write(chunk)
+    if too_big or size == 0:
+        if os.path.isfile(path):
+            os.remove(path)
+        raise HTTPException(status_code=422, detail="Video is larger than 80 MB." if too_big else "The video file is empty.")
+    row = GalleryVideo(title=label[:160], filename=filename)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return gallery_out(row)
+@app.delete("/api/gallery/{video_id}")
+def delete_gallery(video_id: int, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    row = db.query(GalleryVideo).filter(GalleryVideo.id == video_id).first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+    path = os.path.join(GALLERY_DIR, row.filename)
+    if os.path.isfile(path):
+        os.remove(path)
+    db.delete(row)
+    db.commit()
+    return {"ok": True}
+@app.get("/api/gallery/{video_id}/video")
+def play_gallery(video_id: int, token: str, db: Session = Depends(get_db)):
+    staff_from_token(token, db)
+    row = db.query(GalleryVideo).filter(GalleryVideo.id == video_id).first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Video not found")
+    path = os.path.join(GALLERY_DIR, row.filename)
+    if not os.path.isfile(path):
+        raise HTTPException(status_code=404, detail="Video file is missing")
+    return FileResponse(path)

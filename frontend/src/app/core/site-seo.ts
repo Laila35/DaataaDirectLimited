@@ -42,10 +42,40 @@ export const SERVICES_SEO: PageSeo = {
   },
 };
 
+export const ABOUT_SEO: PageSeo = {
+  title: 'About Daataa Direct Limited',
+  description: 'Daataa Direct Limited covers software systems, legal, logistics, graphic design, and the wider fields of operations, commerce and technology. Based in Rawalpindi, delivered remotely.',
+  path: '/about-us',
+  jsonLd: {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Daataa Direct Limited',
+    legalName: 'Daataa Direct Limited',
+    email: 'humanresources.daataadirect@gmail.com',
+    telephone: '+923275087125',
+    description: 'Software systems, legal, logistics, graphic design, operations, commerce and technology, delivered remotely from Rawalpindi.',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'House 106-A, Railway Scheme 1, Near Airport, Chaklala Cantt',
+      addressLocality: 'Rawalpindi',
+      postalCode: '46000',
+      addressRegion: 'Punjab',
+      addressCountry: 'PK',
+    },
+  },
+};
+
 export const SIGN_IN_SEO: PageSeo = {
   title: 'Sign in | Daataa Direct Limited',
   description: 'Staff sign-in for Daataa Direct Limited. Admin accounts use the admin login.',
   path: '/sign-in',
+};
+
+export const RESET_SEO: PageSeo = {
+  title: 'Choose a new password | Daataa Direct Limited',
+  description: 'Set a new password for a Daataa Direct employee or admin account.',
+  path: '/reset-password',
+  robots: 'noindex, nofollow',
 };
 
 export const ADMIN_LOGIN_SEO: PageSeo = {

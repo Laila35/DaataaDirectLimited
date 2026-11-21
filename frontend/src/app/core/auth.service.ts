@@ -16,8 +16,16 @@ export class AuthService {
     return this.http.post<AuthResponse>('/api/auth/login', { email, password, portal }).pipe(tap((res) => this.store(res)));
   }
 
-  register(body: { first_name: string; last_name: string; email: string; employee_code: string; department: string; password: string }) {
+  register(body: { first_name: string; last_name: string; email: string; employee_code: string; department: string; password: string; role: 'employee' | 'admin' }) {
     return this.http.post<AuthResponse>('/api/auth/register', body).pipe(tap((res) => this.store(res)));
+  }
+
+  forgot(email: string) {
+    return this.http.post<{ ok: boolean; message: string }>('/api/auth/forgot', { email });
+  }
+
+  reset(token: string, password: string) {
+    return this.http.post<AuthResponse>('/api/auth/reset', { token, password }).pipe(tap((res) => this.store(res)));
   }
 
   logout() {

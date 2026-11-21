@@ -1,3 +1,5 @@
 <router-outlet />
-<app-whatsapp-chat />
+@if (showWhatsApp()) {
+  <app-whatsapp-chat />
+}
 <app-site-cursor />

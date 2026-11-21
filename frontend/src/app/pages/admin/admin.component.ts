@@ -4,9 +4,9 @@ import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
-import { AboutPage, ApplicationRow, Employee, FaqItem, Job, ReviewItem, Stats } from '../../core/models';
+import { AboutPage, ApplicationRow, Employee, FaqItem, GalleryVideo, Job, ReviewItem, Stats } from '../../core/models';
 import { ABOUT_DEFAULTS } from '../../shared/about-defaults';
-type Panel = 'overview' | 'applications' | 'employees' | 'jobs' | 'about' | 'faqs' | 'reviews' | 'settings';
+type Panel = 'overview' | 'applications' | 'employees' | 'jobs' | 'about' | 'faqs' | 'reviews' | 'gallery' | 'settings';
 @Component({
   selector: 'app-admin',
   imports: [ReactiveFormsModule, RouterLink, DatePipe],
@@ -44,6 +44,9 @@ export class AdminComponent implements OnInit {
   readonly jobs = signal<Job[]>([]);
   readonly faqs = signal<FaqItem[]>([]);
   readonly reviews = signal<ReviewItem[]>([]);
+  readonly videos = signal<GalleryVideo[]>([]);
+  readonly galleryTitle = signal('');
+  readonly galleryBusy = signal(false);
   readonly editingJob = signal<number | null>(null);
   readonly editingFaq = signal<number | null>(null);
   readonly editingReview = signal<number | null>(null);
@@ -60,6 +63,7 @@ export class AdminComponent implements OnInit {
     about: 'About us',
     faqs: 'FAQs',
     reviews: 'Reviews',
+    gallery: 'Gallery',
     settings: 'Settings',
   };
   readonly employeeForm = this.fb.group({
@@ -123,6 +127,7 @@ export class AdminComponent implements OnInit {
     this.api.about().subscribe((page) => this.fillAbout(page));
     this.api.faqs().subscribe((rows) => this.faqs.set(rows));
     this.api.reviews().subscribe((rows) => this.reviews.set(rows));
+    this.api.gallery().subscribe((rows) => this.videos.set(rows));
     this.api.settings().subscribe((row) => this.settingsForm.patchValue(row));
   }
   get aboutSteps(): FormArray {
@@ -343,6 +348,47 @@ export class AdminComponent implements OnInit {
       this.refresh();
     });
   }
+  pickGallery(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.galleryFile = input.files?.[0] ?? null;
+  }
+  saveGallery(input: HTMLInputElement) {
+    const title = this.galleryTitle().trim();
+    const file = this.galleryFile;
+    if (!title || !file) {
+      this.notice.set('Add a title and choose a video file.');
+      return;
+    }
+    const body = new FormData();
+    body.append('title', title);
+    body.append('video', file);
+    this.galleryBusy.set(true);
+    this.notice.set('');
+    this.api.createGallery(body).subscribe({
+      next: () => {
+        this.galleryBusy.set(false);
+        this.galleryTitle.set('');
+        this.galleryFile = null;
+        input.value = '';
+        this.notice.set('Video stored. Employees can watch it on the Gallery page.');
+        this.refresh();
+      },
+      error: (err) => {
+        this.galleryBusy.set(false);
+        this.notice.set(typeof err.error?.detail === 'string' ? err.error.detail : 'The video could not be stored.');
+      },
+    });
+  }
+  removeGallery(item: GalleryVideo) {
+    this.api.deleteGallery(item.id).subscribe(() => {
+      this.notice.set('Video removed.');
+      this.refresh();
+    });
+  }
+  gallerySrc(id: number) {
+    return this.api.gallerySrc(id);
+  }
+  private galleryFile: File | null = null;
   starLine(count: number) {
     const stars = Math.max(0, Math.min(5, count || 0));
     return '★'.repeat(stars) + '☆'.repeat(5 - stars);

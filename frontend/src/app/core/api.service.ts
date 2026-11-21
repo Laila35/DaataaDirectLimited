@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { AboutPage, ApplicationRow, Employee, FaqItem, Job, ReviewItem, Settings, Stats } from './models';
+import { AboutPage, ApplicationRow, Employee, FaqItem, GalleryVideo, Job, ReviewItem, Settings, Stats } from './models';
 
 export interface WaChatMessage {
   id: number;
@@ -131,5 +131,22 @@ export class ApiService {
 
   deleteReview(id: number) {
     return this.http.delete(`/api/reviews/${id}`);
+  }
+
+  gallery() {
+    return this.http.get<GalleryVideo[]>('/api/gallery');
+  }
+
+  createGallery(body: FormData) {
+    return this.http.post<GalleryVideo>('/api/gallery', body);
+  }
+
+  deleteGallery(id: number) {
+    return this.http.delete(`/api/gallery/${id}`);
+  }
+
+  gallerySrc(id: number) {
+    const token = localStorage.getItem('dd_token') ?? '';
+    return `/api/gallery/${id}/video?token=${encodeURIComponent(token)}`;
   }
 }

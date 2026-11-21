@@ -177,6 +177,11 @@
   line-height: 1.5;
 }
 
+@media (max-width: 640px) {
+  .reviews-copy h1 { font-size: clamp(36px, 11vw, 52px); max-width: 12ch; }
+  .reviews-page { padding: 2rem 1.1rem 3rem; }
+  .reviews-actions { flex-wrap: wrap; }
+}
 @media (max-width: 900px) {
   .reviews-page {
     grid-template-columns: 1fr;

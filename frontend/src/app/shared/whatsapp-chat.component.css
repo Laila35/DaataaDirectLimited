@@ -272,6 +272,11 @@
   cursor: pointer;
 }
 .wa-dialog .is-danger { color: #c0392b; }
+@media (max-width: 640px) {
+  .wa { right: 12px; bottom: 12px; }
+  .wa-launcher { width: 54px; height: 54px; }
+  .wa-panel { width: min(360px, calc(100vw - 24px)); }
+}
 @media (prefers-reduced-motion: reduce) {
   .wa-launcher { box-shadow: none; }
 }

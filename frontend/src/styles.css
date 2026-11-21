@@ -2,11 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 html { scroll-behavior: smooth; }
+html, body { max-width: 100%; overflow-x: hidden; }
 body {
   margin: 0;
   background: #fff;
   color: #000;
   font-family: Outfit, "Helvetica Neue", Arial, sans-serif;
+}
+img, video { max-width: 100%; height: auto; }
+@media (max-width: 640px) {
+  h1, h2 { overflow-wrap: anywhere; }
 }
 h1, h2, h3 { font-family: Fraunces, Georgia, "Times New Roman", serif; }
 .stroke-accent {

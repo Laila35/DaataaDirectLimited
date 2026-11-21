@@ -21,6 +21,13 @@ class SessionToken(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     expires_at: Mapped[datetime] = mapped_column(DateTime)
     user: Mapped[User] = relationship(back_populates="sessions")
+class PasswordReset(Base):
+    __tablename__ = "password_resets"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    used: Mapped[int] = mapped_column(Integer, default=0)
 class Job(Base):
     __tablename__ = "jobs"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -111,3 +118,9 @@ class Review(Base):
     place: Mapped[str] = mapped_column(String(120), default="")
     stars: Mapped[int] = mapped_column(Integer, default=5)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
+class GalleryVideo(Base):
+    __tablename__ = "gallery_videos"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(160))
+    filename: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

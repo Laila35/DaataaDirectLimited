@@ -10,8 +10,8 @@ export const CONTACT = {
 };
 
 export const SOCIALS = [
-  { name: 'Facebook', href: 'https://www.facebook.com/daataadirect.co.uk' },
+  { name: 'Facebook', href: 'https://www.linkedin.com/company/daataa-direct-trading-smc-pvt-ltd/' },
   { name: 'Instagram', href: 'https://www.instagram.com/daataadirect_uk' },
-  { name: 'Mastodon', href: 'https://mastodon.social/@daataadirect' },
+  { name: 'Mustakbil', href: 'https://www.mustakbil.com' },
   { name: 'LinkedIn', href: 'https://www.linkedin.com/company/daataa-limited' },
 ];

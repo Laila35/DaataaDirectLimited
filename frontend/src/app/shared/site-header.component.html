@@ -1,5 +1,5 @@
 <div class="sticky top-0 z-20 bg-white/90 backdrop-blur-md">
-  <header class="relative flex justify-center px-20 pt-3 pb-4">
+  <header class="relative flex justify-center px-3 pt-3 pb-4 md:px-20">
     <div class="relative w-full max-w-5xl flex items-center justify-between gap-3 rounded-full border border-black/15 bg-gradient-to-r from-white via-[#e1dbf2] to-white px-3 py-2">
       <a routerLink="/" class="nav-logo-link" aria-label="Daataa Direct home" (click)="goHome()">
         <span class="nav-logo-ring" aria-hidden="true"></span>
@@ -20,11 +20,17 @@
             </div>
           }
         </div>
-        <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/about" (click)="closeMenus()">About</a>
+        <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/about-us" (click)="closeMenus()">About</a>
         <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/careers" (click)="closeMenus()">Careers</a>
         <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/contact" (click)="closeMenus()">Contact</a>
+        <a class="font-semibold px-4 py-2 rounded-full hover:bg-black/5" routerLink="/gallery" (click)="closeMenus()">Gallery</a>
         @if (auth.user()?.role === 'admin') {
           <a class="font-semibold px-4 py-2 rounded-full border border-black" routerLink="/admin" (click)="closeMenus()">Admin</a>
+        }
+        @if (auth.user()) {
+          <button type="button" class="md:hidden px-4 py-2 text-left font-bold" (click)="signOut()">Logout</button>
+        } @else {
+          <a class="md:hidden px-4 py-2 font-bold" routerLink="/sign-in" (click)="closeMenus()">Sign in</a>
         }
       </nav>
       <a routerLink="/contact" class="hidden md:inline-flex items-center rounded-full bg-accent font-bold px-5 py-3">Start your project</a>
@@ -39,9 +45,9 @@
       }
     </div>
     @if (auth.user()) {
-      <button type="button" class="absolute right-2 top-5 bg-transparent px-3 py-1.5 text-sm font-bold text-black" (click)="signOut()">Logout</button>
+      <button type="button" class="absolute right-4 top-5 hidden bg-transparent px-3 py-1.5 text-sm font-bold text-black md:inline" (click)="signOut()">Logout</button>
     } @else {
-      <a class="absolute right-2 top-5 bg-transparent px-3 py-1.5 text-sm font-bold text-black" routerLink="/sign-in" (click)="closeMenus()">Sign in</a>
+      <a class="absolute right-4 top-5 hidden bg-transparent px-3 py-1.5 text-sm font-bold text-black md:inline" routerLink="/sign-in" (click)="closeMenus()">Sign in</a>
     }
   </header>
 </div>

@@ -1,12 +1,6 @@
 <div class="min-h-screen grid lg:grid-cols-2">
   <aside class="auth-side text-white p-10 flex flex-col justify-end min-h-[280px] relative overflow-hidden">
     <app-data-globe [showLogo]="true" [logoUrl]="'/logo.jpeg'" class="auth-globe" />
-    <div class="auth-copy">
-      <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Daataa Direct Limited</p>
-      <h1 class="mt-4 font-black tracking-tight leading-none text-5xl max-w-[10ch]">Admin sign in</h1>
-      <p class="mt-5 max-w-sm text-white/80 text-lg leading-relaxed">The private desk for careers, the About page, and applications. Team accounts use a separate sign-in.</p>
-      <small class="mt-6 block text-white/50">© 2026 Daataa Direct Limited</small>
-    </div>
   </aside>
   <section class="auth-panel grid place-items-center p-8 relative bg-white text-black">
     <a routerLink="/" class="absolute top-5 right-5 w-12 h-12 rounded-full border border-black grid place-items-center text-2xl" aria-label="Back to the site">×</a>
@@ -30,9 +24,6 @@
             @if (error()) { <p class="text-sm text-red-700">{{ error() }}</p> }
             <button class="rounded-full bg-black text-white font-bold py-4 hover:bg-accent hover:text-black" type="submit" [disabled]="busy()">Sign in to admin</button>
           </form>
-          <p class="mt-5 rounded-2xl border border-accent bg-note p-4 text-sm leading-relaxed">
-            Admin: admin&#64;daataadirect.com / Password123
-          </p>
           <p class="mt-5 text-sm text-black/60">
             Team member?
             <a routerLink="/sign-in" class="font-bold text-black">Sign in here</a>

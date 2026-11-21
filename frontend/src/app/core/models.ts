@@ -104,3 +104,8 @@ export interface ReviewItem {
   place: string;
   stars: number;
 }
+export interface GalleryVideo {
+  id: number;
+  title: string;
+  created_at: string;
+}
